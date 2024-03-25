@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="Book.css">
+</head>
+
+<body>
+    <h1>记事本<span class="verson">ver99</span>
+        <div>
+            <form action="search"><button>搜索</button><input type="text" class="search_input"></form>
+            <ul>
+
+            </ul>
+        </div>
+    </h1>
+    <div class="all">
+        <div class="write_down"><textarea placeholder="请输入要记录的内容(按回车完成)" class="write_down_text"></textarea></div>
+        <ul class="context">
+        </ul>
+    </div>
+
+    <script>
+        const input = document.querySelector('.write_down_text');
+        const context = document.querySelector('.context');
+        const search = document.querySelector('button');
+        const search_input = document.querySelector('.search_input')
+        const find = document.querySelector('h1 div ul');
+        let Remenbre = JSON.parse(localStorage.getItem('Recording')) || [];
+        let all_li = [];
+        let i = 0
+        context.innerHTML = Remenbre.map(function (item) {
+            return `<li ><span data-id='${i}' class='iconfont delete'>&#xe844;</span>${item}<a href='#'data-id='${i++}' >修改</a><div class="change">
+            <textarea placeholder="请输入修改后的内容" 
+            class="change_context"></textarea></div></li>`
+        }).join();
+        input.addEventListener('keyup', function (e) {
+            if (e.key == 'Enter') {
+                if (input.value != '\n') {
+                    i = 0
+                    Remenbre.unshift(input.value);
+                    context.innerHTML = Remenbre.map(function (item) {
+                        return `<li ><span data-id='${i}' class='delete iconfont'>&#xe844;</span>${item}<a href='#' data-id='${i++}'>修改</a><div class="change"> <textarea placeholder="请输入修改后的内容" 
+            class="change_context"></textarea></div></li>`
+                    }).join();
+                    localStorage.setItem('Recording', JSON.stringify(Remenbre))
+                }
+                input.value = ''
+            }
+        }
+        )
+        context.addEventListener('click', function (e) {
+            if (e.target.tagName == 'SPAN') {
+                Remenbre.splice(e.target.dataset.id, 1)
+                i = 0
+                context.innerHTML = Remenbre.map(function (item) {
+                    return `<li ><span data-id='${i}' class='delete iconfont'>&#xe844;</span>${item}<a href='#' data-id='${i++}'>修改</a><div class="change"> <textarea placeholder="请输入修改后的内容" 
+            class="change_context"></textarea></div></li>`
+                }).join();
+                localStorage.setItem('Recording', JSON.stringify(Remenbre))
+            }
+        })
+        context.addEventListener('click', function (e) {
+            if (e.target.tagName == 'A') {
+                Remenbre[e.target.dataset.id] = prompt("请输入修改后的内容") || Remenbre[e.target.dataset.id]
+                i = 0
+                context.innerHTML = Remenbre.map(function (item) {
+                    return `<li ><span data-id='${i}' class='delete iconfont'>&#xe844;</span>${item}<a href='#' data-id='${i++}'>修改</a><div class="change"> <textarea placeholder="请输入修改后的内容" 
+            class="change_context"></textarea></div></li>`
+                }).join();
+                localStorage.setItem('Recording', JSON.stringify(Remenbre))
+            }
+        })
+        search.addEventListener('click', function (e) {
+            e.preventDefault();
+        })
+        search_input.addEventListener('focus', function (e) {
+            find.innerHTML = Remenbre.map(function (item) {
+                return `<li>${item}</li>`
+            }).join('');
+            for (let i = 0; i < Remenbre.length; i++) {
+                if (Remenbre[i].includes(search_input.value) || Remenbre[i] == search_input.value + '\n') {
+                    let color_change = document.querySelectorAll('.context li')
+                    color_change[i].style.color = 'red';
+                }
+            }
+        })
+        search_input.addEventListener('keyup', function (e) {
+            find.innerHTML = Remenbre.filter(function (item) {
+                if (item.includes(search_input.value))
+                    return item
+            }).map(function (item) {
+                return `<li>${item}</li>`
+            }).join('')
+            for (let i = 0; i < Remenbre.length; i++) {
+                if (Remenbre[i].includes(search_input.value) || Remenbre[i] == search_input.value + '\n') {
+                    let color_change = document.querySelectorAll('.context li')
+                    color_change[i].style.color = 'red';
+                }
+                else {
+                    let color_change = document.querySelectorAll('.context li')
+                    color_change[i].style.color = 'black';
+                }
+            }
+        })
+        search_input.addEventListener('blur', function (e) {
+            find.innerHTML = ''
+            let color_change = document.querySelectorAll('.context li')
+            for (let i = 0; i < Remenbre.length; i++)
+                color_change[i].style.color = 'black';
+
+        })
+
+    </script>
+</body>
+
+</html>
